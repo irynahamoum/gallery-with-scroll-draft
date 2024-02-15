@@ -4,6 +4,7 @@ body {
   justify-content: center;
   align-items: center;
   padding-top: 20px;
+  padding-bottom: 20px;
 }
 
 .form {
@@ -128,12 +129,6 @@ a > img {
   line-height: 18px;
   letter-spacing: 0.03em;
   color: #2e2f42;
-}
-
-.js-target {
-  width: 100px;
-  height: 100px;
-  background-color: black;
 }
 
 /* ================================================================== */

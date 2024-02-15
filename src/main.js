@@ -8,7 +8,7 @@ const form = document.querySelector('.form');
 const galleryGrid = document.querySelector('.gallery-grid');
 const loader = document.querySelector('.loader');
 // const loadMoreBtn = document.querySelector('.js-load-more-btn');
-const target = document.querySelector('js-target');
+const target = document.querySelector('.js-target');
 let gallery = new SimpleLightbox('.gallery-grid a', {
   captionsData: 'alt',
 });
@@ -21,17 +21,19 @@ let totalPages = 0;
 
 form.addEventListener('submit', handleFormSubmit);
 
-loadMoreBtn.addEventListener('click', handleLoadBtnClick);
+// loadMoreBtn.addEventListener('click', handleLoadBtnClick);
 
 const onEntry = (entries, observer) => {
-  entries.forEach(entry => {});
+  entries.forEach(entry => {
+    if (entry.isIntersecting) loadMore();
+  });
 };
 
 const observer = new IntersectionObserver(onEntry);
 
 async function handleFormSubmit(event) {
   event.preventDefault();
-  hideLoadMoreBtn();
+  unObserveElement();
 
   galleryGrid.innerHTML = '';
 
@@ -73,9 +75,9 @@ async function handleFormSubmit(event) {
   event.target.reset();
 }
 
-async function handleLoadBtnClick(event) {
+async function loadMore() {
   showLoader();
-  hideLoadMoreBtn();
+  unObserveElement();
 
   try {
     page += 1;
@@ -85,6 +87,13 @@ async function handleLoadBtnClick(event) {
       hideLoader();
       checkLoadBtnStatus();
       createMarkupByHits(data.hits);
+      const cardHeight = document
+        .querySelector('.gallery-card')
+        .getBoundingClientRect().height;
+      scrollBy({
+        top: cardHeight * 2,
+        behavior: 'smooth',
+      });
       return;
     }
     throw Error(
@@ -97,15 +106,13 @@ async function handleLoadBtnClick(event) {
       position: 'topRight',
     });
   }
-
-  event.target.reset();
 }
 
 function checkLoadBtnStatus() {
   if (totalPages !== page) {
-    showLoadMoreBtn();
+    observeElement();
   } else {
-    hideLoadMoreBtn();
+    unObserveElement();
     iziToast.info({
       message: "We're sorry, but you've reached the end of search results.",
       position: 'topRight',
@@ -121,12 +128,12 @@ function hideLoader() {
   loader.style.display = 'none';
 }
 
-function showLoadMoreBtn() {
-  loadMoreBtn.classList.remove('hidden');
+function observeElement() {
+  observer.observe(target);
 }
 
-function hideLoadMoreBtn() {
-  loadMoreBtn.classList.add('hidden');
+function unObserveElement() {
+  observer.unobserve(target);
 }
 
 async function getImagesByInputValue() {
